@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weekly Meal Planner & Cookbook</title>
+  <meta name="description" content="Personal weekly meal planner and digital cookbook connected dynamically to Google Sheets.">
+
+  <!-- Google Fonts: Elegant Serif (Fraunces) + Clean Sans (Plus Jakarta Sans) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- =========================================================================
+       Application Header
+       ========================================================================= -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand-section">
+        <div class="brand-icon" aria-hidden="true">
+          <!-- Herb / Leaf Logo SVG -->
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+            <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>Weekly Meal Planner</h1>
+          <div class="brand-tagline">
+            <span>Cookbook & Journal</span>
+            <span class="pill">Google Sheets Live</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="nav-tabs" aria-label="Main Navigation">
+        <button class="nav-tab active" data-tab="planner">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span>Weekly Planner</span>
+        </button>
+        <button class="nav-tab" data-tab="recipes">
+          <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <span>My Recipes</span>
+          <span class="badge" id="nav-recipes-count">0</span>
+        </button>
+        <button class="nav-tab" data-tab="shopping">
+          <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          <span>Shopping List</span>
+          <span class="badge" id="nav-shopping-count">0</span>
+        </button>
+      </nav>
+
+      <!-- Action Buttons -->
+      <div class="header-actions">
+        <button class="btn-surprise" id="btn-open-surprise" title="Get a random recipe suggestion">
+          <!-- Sparkles SVG -->
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8L12 2z"/>
+          </svg>
+          <span>Surprise Me!</span>
+        </button>
+
+        <button class="btn-sync" id="btn-refresh-sheets" title="Fetch latest recipe data from Google Sheets">
+          <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          <span id="sync-btn-label">Refresh Recipes</span>
+        </button>
+
+        <button class="btn-icon-only" id="btn-open-settings" title="Google Sheet connection details">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================================================
+       Dashboard Overview Bar (Requirement 7)
+       ========================================================================= -->
+  <aside class="dashboard-bar">
+    <div class="dashboard-inner">
+      <div class="dashboard-stats">
+        <div class="stat-chip">
+          <div class="stat-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+          </div>
+          <div class="stat-content">
+            <span class="stat-value" id="dash-planned-meals">0 / 21</span>
+            <span class="stat-label">Meals Planned</span>
+          </div>
+        </div>
+
+        <div class="stat-chip">
+          <div class="stat-icon olive">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </div>
+          <div class="stat-content">
+            <span class="stat-value" id="dash-unique-recipes">0</span>
+            <span class="stat-label">Unique Recipes</span>
+          </div>
+        </div>
+
+        <div class="stat-chip">
+          <div class="stat-icon gold">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          </div>
+          <div class="stat-content">
+            <span class="stat-value" id="dash-shopping-items">0 items</span>
+            <span class="stat-label">Grocery Items</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sync Status Indicator -->
+      <div class="sync-indicator" id="sync-status-indicator">
+        <span class="status-dot" id="sync-dot"></span>
+        <span id="sync-status-text">Connecting to Google Sheets...</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- =========================================================================
+       Main Content Container
+       ========================================================================= -->
+  <main class="main-content">
+
+    <!-- VIEW 1: WEEKLY MEAL PLANNER (Requirement 3) -->
+    <section class="view-section active" id="view-planner">
+      <div class="week-navigator-bar">
+        <div class="week-selector">
+          <button class="week-nav-btn" id="btn-prev-week" title="Previous Week">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          
+          <div class="week-heading-group">
+            <h2 class="week-title" id="week-display-title">This Week</h2>
+            <span class="week-subtitle" id="week-display-dates">Loading dates...</span>
+          </div>
+
+          <button class="week-nav-btn" id="btn-next-week" title="Next Week">
+            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+
+        <div class="planner-quick-actions">
+          <button class="btn-secondary" id="btn-today-week">
+            <span>Today</span>
+          </button>
+          <button class="btn-secondary danger" id="btn-clear-week" title="Clear this week's meals">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            <span>Clear Week</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 7-Day Calendar Grid (Monday to Sunday) -->
+      <div class="weekly-grid" id="weekly-calendar-grid">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+    </section>
+
+    <!-- VIEW 2: RECIPE COLLECTION (Requirement 4) -->
+    <section class="view-section" id="view-recipes">
+      <div class="recipes-header-bar">
+        <div class="section-title-group">
+          <h2>My Recipes</h2>
+          <p>Sourced dynamically from your Google Sheets recipe database</p>
+        </div>
+      </div>
+
+      <!-- Search & Filters -->
+      <div class="recipe-controls">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="recipe-search-input" class="search-input" placeholder="Search by recipe name or ingredient (e.g. pasta, shrimp, eggs)...">
+          <button class="clear-search-btn" id="btn-clear-search" title="Clear search">
+            <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <div class="category-filter-pills" id="recipe-filter-pills">
+          <button class="filter-pill active" data-filter="all">All Recipes</button>
+          <button class="filter-pill" data-filter="breakfast">Breakfast</button>
+          <button class="filter-pill" data-filter="lunch/dinner">Lunch / Dinner</button>
+        </div>
+
+        <div class="recipe-count-indicator" id="recipe-count-indicator">
+          Showing 0 recipes
+        </div>
+      </div>
+
+      <!-- Recipe Cards Grid -->
+      <div class="recipes-grid" id="recipes-cards-grid">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+    </section>
+
+    <!-- VIEW 3: SHOPPING LIST (Requirement 5) -->
+    <section class="view-section" id="view-shopping">
+      <div class="shopping-list-header">
+        <div class="section-title-group">
+          <h2>Weekly Shopping List</h2>
+          <p>Consolidated automatically from your planned meals for this week</p>
+        </div>
+
+        <div class="shopping-actions-group">
+          <div class="shopping-stats-pill">
+            <span id="shopping-stats-text"><strong>0</strong> items needed</span>
+          </div>
+
+          <button class="btn-secondary" id="btn-copy-shopping" title="Copy shopping list to clipboard">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span>Copy</span>
+          </button>
+
+          <button class="btn-secondary" id="btn-print-shopping" title="Print shopping list">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            <span>Print</span>
+          </button>
+
+          <button class="btn-secondary danger" id="btn-clear-checked-shopping" title="Reset all checked items">
+            <span>Clear Checked</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="shopping-container">
+        <!-- Grouped Categorized Shopping Items -->
+        <div class="shopping-categories-column" id="shopping-categories-column">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <!-- Sidebar: Add custom item + planned meal reference -->
+        <aside class="shopping-sidebar">
+          <div class="add-custom-card">
+            <h3 class="card-title-sm">Add Extra Item</h3>
+            <form class="add-item-form" id="form-add-custom-item">
+              <input type="text" id="custom-item-input" class="input-field" placeholder="e.g. Olive oil, Coffee, Milk..." required>
+              <select id="custom-item-category" class="input-field">
+                <option value="produce">🌱 Fresh Produce & Herbs</option>
+                <option value="dairy_eggs">🥚 Dairy & Eggs</option>
+                <option value="meat_seafood">🥩 Meat & Seafood</option>
+                <option value="bakery">🍞 Bakery & Bread</option>
+                <option value="pantry" selected>🧂 Pantry, Grains & Spices</option>
+                <option value="other">🛒 Other & Sundries</option>
+              </select>
+              <button type="submit" class="btn-primary-block">+ Add to List</button>
+            </form>
+          </div>
+
+          <div class="shopping-meal-summary-card">
+            <h3 class="card-title-sm">Meals Sourced This Week</h3>
+            <div class="planned-meals-mini-list" id="shopping-meals-mini-list">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =========================================================================
+       MODAL 1: Recipe Details Modal
+       ========================================================================= -->
+  <div class="modal-backdrop" id="modal-recipe-details">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="recipe-modal-title">Recipe Details</h3>
+        <button class="btn-close-modal" id="btn-close-details" title="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" id="recipe-modal-body">
+        <!-- Rendered dynamically -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="btn-close-details-footer">Close</button>
+        <button class="btn-card-action primary" id="btn-plan-from-details">Add to Meal Plan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 2: Recipe Selector Modal (When assigning to slot)
+       ========================================================================= -->
+  <div class="modal-backdrop" id="modal-recipe-picker">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title" id="picker-modal-title">Select Recipe</h3>
+          <p class="brand-tagline" id="picker-modal-subtitle">Choose a recipe for Monday Breakfast</p>
+        </div>
+        <button class="btn-close-modal" id="btn-close-picker" title="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="picker-search-input" class="search-input" placeholder="Search recipe...">
+        </div>
+        <div class="recipe-picker-list" id="recipe-picker-list">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="btn-cancel-picker">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 3: Surprise Me! Random Meal Generator (Requirement 6)
+       ========================================================================= -->
+  <div class="modal-backdrop" id="modal-surprise">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">✨ Surprise Me!</h3>
+        <button class="btn-close-modal" id="btn-close-surprise" title="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="surprise-filter-tabs">
+          <button class="surprise-filter-btn active" data-surprise-type="any">Any Meal</button>
+          <button class="surprise-filter-btn" data-surprise-type="breakfast">Breakfast</button>
+          <button class="surprise-filter-btn" data-surprise-type="lunch/dinner">Lunch / Dinner</button>
+        </div>
+
+        <div class="surprise-content-box" id="surprise-recipe-card">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <div class="surprise-schedule-section">
+          <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 4px;">Add this suggested recipe directly to your week:</label>
+          <div class="surprise-schedule-grid">
+            <select id="surprise-target-day" class="input-field">
+              <option value="monday">Monday</option>
+              <option value="tuesday">Tuesday</option>
+              <option value="wednesday">Wednesday</option>
+              <option value="thursday">Thursday</option>
+              <option value="friday">Friday</option>
+              <option value="saturday">Saturday</option>
+              <option value="sunday">Sunday</option>
+            </select>
+            <select id="surprise-target-slot" class="input-field">
+              <option value="breakfast">Breakfast</option>
+              <option value="lunch">Lunch</option>
+              <option value="dinner" selected>Dinner</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="btn-spin-again">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          <span>Spin Again</span>
+        </button>
+        <button class="btn-card-action primary" id="btn-add-surprise-to-plan">Add to Meal Plan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 4: Settings & Spreadsheet Connection (Requirement 8)
+       ========================================================================= -->
+  <div class="modal-backdrop" id="modal-settings">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Google Sheets Connection</h3>
+        <button class="btn-close-modal" id="btn-close-settings" title="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="connection-status-box" id="settings-status-box">
+          <span class="status-dot"></span>
+          <span id="settings-status-text">Connected to Google Sheets</span>
+        </div>
+
+        <div>
+          <label style="font-size: 0.82rem; font-weight: 600; color: var(--text-main); display: block; margin-bottom: 5px;">Google Spreadsheet URL or Sheet ID:</label>
+          <input type="text" id="settings-sheet-id" class="input-field" value="1Tx7Z1OhNKXpwp2Im3zq-xOdiDRM_FReswbRLwyDExXU">
+          <p class="help-text" style="margin-top: 4px;">
+            Default connected sheet: <a href="https://docs.google.com/spreadsheets/d/1Tx7Z1OhNKXpwp2Im3zq-xOdiDRM_FReswbRLwyDExXU/edit?gid=0#gid=0" target="_blank" class="sheet-link-badge">Open in Google Sheets ↗</a>
+          </p>
+        </div>
+
+        <div>
+          <label style="font-size: 0.82rem; font-weight: 600; color: var(--text-main); display: block; margin-bottom: 5px;">Sheet Tab GID (defaults to 0):</label>
+          <input type="text" id="settings-sheet-gid" class="input-field" value="0">
+        </div>
+
+        <p class="help-text">
+          💡 <strong>How it works:</strong> The application reads the spreadsheet dynamically via Google's live Visualization API with automatic JSONP handling. Any new recipes added to your Google Sheet will appear when you click <strong>Refresh Recipes</strong>.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="btn-reset-sheet-default">Reset to Default</button>
+        <button class="btn-card-action primary" id="btn-save-sheet-settings">Save & Re-sync</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+  <!-- App Footer -->
+  <footer class="app-footer">
+    <div class="footer-inner">
+      <span>Weekly Meal Planner • Warm & Minimalist Food Journal</span>
+      <span>
+        Recipe Source: 
+        <a href="https://docs.google.com/spreadsheets/d/1Tx7Z1OhNKXpwp2Im3zq-xOdiDRM_FReswbRLwyDExXU/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer" class="sheet-link-badge">
+          Google Sheets Database
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </a>
+      </span>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/sheets.js"></script>
+  <script src="js/ingredients.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
